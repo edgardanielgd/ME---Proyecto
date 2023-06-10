@@ -14,5 +14,13 @@ tagged_sentences = treebank.tagged_words()
 # for each item on there
 grammar.learn_grammar_from_trees( parsed_sentences )
 
-print("Generating sentence")
-print( grammar.generate_sentence() )
+# Get the maximum size of non terminals sequences
+maximum = 0
+for _, non_terminal in grammar.non_terminals.items():
+    # non_terminal is a GrammarElement object
+    for sequence in non_terminal.sequences:
+        # sequence is a SequenceElement object
+        if len(sequence.grammar_elements) > maximum:
+            maximum = len(sequence.grammar_elements)
+
+print( maximum )

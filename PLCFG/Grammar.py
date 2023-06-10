@@ -29,6 +29,8 @@ class Grammar:
             # Save each rule visited, the last one will be the end of the sentence
             self.last_rule = None 
 
+            parsed_sentence.chomsky_normal_form()
+
             # First, we must define a START symbol which will be the root of the tree
             start_symbol = self.traverse(parsed_sentence)
 
@@ -140,4 +142,7 @@ class Grammar:
             # If not, then we must substract the probability of this sequence
             # and continue searching
             random_value -= sequence.probability
-        
+
+    # Its required to a parse tree to be in Chomsky Normal Form
+    # so the best solution is to take each sentence and convert it
+    # Then our PCFG will be in CNF        

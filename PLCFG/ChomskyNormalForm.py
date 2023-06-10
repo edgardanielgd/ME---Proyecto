@@ -5,4 +5,4 @@
 class ChomskyNormalForm:
     def parse( probabilistic_grammar ):
         # Lets parse this probabilistic grammar to Chomsky Normal Form
-        
+        pass
