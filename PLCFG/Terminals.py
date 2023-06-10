@@ -48,7 +48,6 @@ class SequenceElement:
         string_representation += " - " + str(self.probability)
         return string_representation
 
-
 # New GrammarElements (Terminals and Non Terminal tokens) will be created
 # outside this class, but this class will be used to store the rules and relevant data
 class GrammarElement:
@@ -58,7 +57,12 @@ class GrammarElement:
         self.name = None
         self.count = 0
         self.sequences = []
+        self.terminals = []
         self.terminal_value = None 
+
+        # Number of times this sequence ends a sentence
+        self.ending_count = 0
+        self.ending_prob = 0.0
 
         # Lets say rule can be whether a terminal or a non terminal
         if( is_terminal ):
@@ -89,14 +93,24 @@ class GrammarElement:
         # Then we should add it to the array and set its count
         new_sequence = SequenceElement( _sequence )
         new_sequence.count = 1
-        self.sequences.append( 
-            new_sequence
-        )
+
+        # Check if sequence was a terminal
+        if( len(_sequence) == 1 and _sequence[0].is_terminal ):
+            self.terminals.append( new_sequence )
+        else:
+            self.sequences.append( new_sequence )
 
     def calculate_probabilities(self):
         # Calculate the probability of each sequence
         for sequence in self.sequences:
             sequence.calculate_probability( self.count )
+        
+        # Calculate the probability of each terminal
+        for terminal in self.terminals:
+            terminal.calculate_probability( self.count )
+        
+        # Calculate the probability of this rule ending a sentence
+        self.ending_prob = self.ending_count / self.count
 
     def __str__(self):
         # String representation of this rule

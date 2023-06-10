@@ -14,4 +14,5 @@ tagged_sentences = treebank.tagged_words()
 # for each item on there
 grammar.learn_grammar_from_trees( parsed_sentences )
 
-print( len( parsed_sentences ) )
+print("Generating sentence")
+print( grammar.generate_sentence() )

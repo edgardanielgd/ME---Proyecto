@@ -1,3 +1,4 @@
+import random
 from Terminals import GrammarElement
 import nltk
 
@@ -7,11 +8,36 @@ class Grammar:
     def __init__(self):
         self.non_terminals = {}
         self.terminals = {}
+
+        # A start is a non terminal and will match the rule
+        # starting a sentence
+        self.non_terminals["START"] = GrammarElement(
+            "START"
+        )
+
+        # In other side, END implies the end of a sentence
+        # then non terminals targeting this terminal will
+        # be the last rule in a generated sentence
+        self.terminals["END"] = GrammarElement(
+            "END", True
+        )
     
     def learn_grammar_from_trees( self, sentences_trees ):
         # Print the first parsed sentence
+
         for parsed_sentence in sentences_trees:
-            self.traverse(parsed_sentence)
+            # Save each rule visited, the last one will be the end of the sentence
+            self.last_rule = None 
+
+            # First, we must define a START symbol which will be the root of the tree
+            start_symbol = self.traverse(parsed_sentence)
+
+            # Add a rule to the start symbol, so we can check which
+            # terminal / non_terminal tends to start a sentence
+            self.non_terminals["START"].add_rule( [start_symbol] )
+
+            # Increment by 1 the number of times last rule ends a sentence
+            self.last_rule.ending_count += 1
         
         # Calculate probabilities for each rule in the grammar
         for non_terminal, _ in self.non_terminals.items():
@@ -56,10 +82,17 @@ class Grammar:
 
             # Now, visit each children 
             children = []
+
             for child in tree:
                 # Traverse the child
                 child_result = self.traverse(child)
                 children.append( child_result )
+            
+            # Check if the last rule is the previous to a terminal
+            # By overwritting this value, we will get at the end the
+            # last Hidden Markov State that ends a sentence
+            if len( children ) == 1 and children[0].is_terminal:
+                self.last_rule = non_terminal_to_add
 
             # Add the child to the non terminal
             non_terminal_to_add.add_rule( children )    
@@ -68,3 +101,43 @@ class Grammar:
 
         # This should never happen
         return None
+
+    # Generate a sentence starting from a certain terminal
+    def generate_sentence(self, non_terminal = None ):
+        # Check if the starting terminal is in the grammar
+
+        # Get the starting terminal
+        if non_terminal is None:
+            starting_non_terminal = self.non_terminals["START"]
+        else:
+            starting_non_terminal = self.non_terminals[non_terminal]
+        
+        # Generate a sentence starting from the starting terminal
+        random_value = random.random()
+
+        # We have to decide whether this non terminal
+        # results in a sequence of non terminals or a single terminal
+
+        # Choose a random terminal to generate
+        for sequence in starting_non_terminal.terminals:
+            if random_value <= sequence.probability:
+                # This is the terminal to choose
+                print( sequence.grammar_elements[0].terminal_value, end=" " )
+                return
+
+            # If not, then we must substract the probability of this terminal
+            # and continue searching
+            random_value -= sequence.probability
+        
+        # If not a terminal, then it must be a sequence of non terminals
+        for sequence in starting_non_terminal.sequences:
+            if random_value <= sequence.probability:
+                # This is the sequence to choose
+                for non_terminal in sequence.grammar_elements:
+                    self.generate_sentence( non_terminal.name )
+                return
+
+            # If not, then we must substract the probability of this sequence
+            # and continue searching
+            random_value -= sequence.probability
+        
