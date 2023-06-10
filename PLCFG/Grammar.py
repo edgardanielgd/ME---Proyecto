@@ -1,5 +1,6 @@
 import random
 from Terminals import GrammarElement
+from ChomskyNormalForm import ParseChomskyNormalForm
 import nltk
 
 # Save terminals and non_terminals to a specific class 
@@ -29,7 +30,9 @@ class Grammar:
             # Save each rule visited, the last one will be the end of the sentence
             self.last_rule = None 
 
-            parsed_sentence.chomsky_normal_form()
+            # Parse the tree to Chomsky Normal Form before traversing it.
+            # By doing this on all training sentences, we will have a PCFG in CNF as well
+            ParseChomskyNormalForm( parsed_sentence )
 
             # First, we must define a START symbol which will be the root of the tree
             start_symbol = self.traverse(parsed_sentence)

@@ -24,3 +24,6 @@ for _, non_terminal in grammar.non_terminals.items():
             maximum = len(sequence.grammar_elements)
 
 print( maximum )
+
+# Generate a sentence using the grammar
+print( grammar.generate_sentence() )
