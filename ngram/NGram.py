@@ -1,29 +1,159 @@
-class NGramNLPModel:
-    """
-        Simple n-gram model for text prediction by training
-        bayesian probabilities
-    """
+import string
+import random
+import time
+from typing import List
+import nltk
 
-    # Default constructor
-    def __init__(self, n=2):
-        """
-            Takes: n - the n-gram model to be used
-            Recall n represents the number of previous words that will
-            be considered as the past of a given word to appear again
+# ideally we would use some smart text tokenizer, but for simplicity use this one
+def tokenize(text: str) -> List[str]:
+    """
+    :param text: Takes input sentence
+    :return: tokenized sentence
+    """
+    for punct in string.punctuation:
+        text = text.replace(punct, ' '+punct+' ')
+    t = text.split()
+    return t
 
-            Example (Default):
-                n = 2
-        """
+def get_ngrams(n: int, tokens: list) -> list:
+    """
+    :param n: n-gram size
+    :param tokens: tokenized sentence
+    :return: list of ngrams
+
+    ngrams of tuple form: ((previous wordS!), target word)
+    """
+    # tokens.append('<END>')
+    tokens = (n-1)*['<START>']+tokens
+    l = [(tuple([tokens[i-p-1] for p in reversed(range(n-1))]), tokens[i]) for i in range(n-1, len(tokens))]
+    return l
+
+
+class NgramModel(object):
+
+    def __init__(self, n):
         self.n = n
 
-        # Each word will be composed by a list of seen previous words
-        # and the number of times that sequence did appear
-        self.ngram = {}
+        # dictionary that keeps list of candidate words given context
+        self.context = {}
 
-        # Each word will be composed by a list of seen previous words
-        # and the probability of that sequence to appear, this is the final
-        # result after training model with data
-        self.ngram_probabilities = {}
-    
-    def train_with_string (self, input_string):
-        pass
+        # keeps track of how many times ngram has appeared in the text before
+        self.ngram_counter = {}
+
+    def update(self, sentence: str) -> None:
+        """
+        Updates Language Model
+        :param sentence: input text
+        """
+        n = self.n
+        ngrams = get_ngrams(n, tokenize(sentence))
+        for ngram in ngrams:
+            if ngram in self.ngram_counter:
+                self.ngram_counter[ngram] += 1.0
+            else:
+                self.ngram_counter[ngram] = 1.0
+
+            prev_words, target_word = ngram
+            if prev_words in self.context:
+                self.context[prev_words].append(target_word)
+            else:
+                self.context[prev_words] = [target_word]
+
+    def prob(self, context, token):
+        """
+        Calculates probability of a candidate token to be generated given a context
+        :return: conditional probability
+        """
+        try:
+            count_of_token = self.ngram_counter[(context, token)]
+            count_of_context = float(len(self.context[context]))
+            result = count_of_token / count_of_context
+
+        except KeyError:
+            result = 0.0
+        return result
+
+    def random_token(self, context):
+        """
+        Given a context we "semi-randomly" select the next word to append in a sequence
+        :param context:
+        :return:
+        """
+        r = random.random()
+        map_to_probs = {}
+        token_of_interest = self.context[context]
+        for token in token_of_interest:
+            map_to_probs[token] = self.prob(context, token)
+
+        summ = 0
+        for token in sorted(map_to_probs):
+            summ += map_to_probs[token]
+            if summ > r:
+                return token
+
+    def generate_text(self, token_count: int, seed=None):
+        """
+        :param token_count: number of words to be produced
+        :param seed: initial seed for text generation
+        :return: generated text
+        """
+        n = self.n
+        context_queue = (n - 1) * ['<START>']
+        result = []
+        
+        if seed is not None:
+            seed_tokens = tokenize(seed)
+            context_queue = seed_tokens[-(n-1):]
+            result.extend(seed_tokens)
+        
+        for _ in range(token_count):
+            obj = self.random_token(tuple(context_queue))
+            result.append(obj)
+            if n > 1:
+                context_queue.pop(0)
+                if obj == '.':
+                    context_queue = (n - 1) * ['<START>']
+                else:
+                    context_queue.append(obj)
+        return ' '.join(result)
+
+
+def create_ngram_model(n, path):
+    # input_data = ''
+
+    # input_data += nltk.corpus.gutenberg.raw('austen-emma.txt')
+    # input_data += nltk.corpus.gutenberg.raw('austen-persuasion.txt')
+    # input_data += nltk.corpus.gutenberg.raw('austen-sense.txt')
+    # input_data += nltk.corpus.gutenberg.raw('bible-kjv.txt')
+    # input_data += nltk.corpus.gutenberg.raw('blake-poems.txt')
+    # input_data += nltk.corpus.gutenberg.raw('bryant-stories.txt')
+
+    m = NgramModel(n)
+    with open(path, 'r', encoding='utf-8') as f:
+        text = f.read()
+        text = text.split('.')
+        for sentence in text:
+            # add back the fullstop
+            sentence += '.'
+            m.update(sentence)
+    return m
+
+
+if __name__ == "__main__":
+    start = time.time()
+    m = create_ngram_model(8, 'ngram/Frankenstein.txt')
+
+    print (f'Language Model creating time: {time.time() - start}')
+    start = time.time()
+    random.seed(7)
+    print(f'{"="*50}\nGenerated text:')
+
+    seed1= 'This is the most favourable period for travelling'
+    seed2='travelling in Russia'
+    seed3='Farewell, my dear, excellent Margaret'
+    seed4='Hello'
+    print(m.generate_text(50, seed=seed1))
+    print(f'{"="*50}')
+
+    test= nltk.corpus.gutenberg.raw('bible-kjv.txt')
+    print(test)

@@ -1,6 +1,10 @@
 # Import required libraries
 from nltk.tokenize.treebank import TreebankWordTokenizer, TreebankWordDetokenizer
 import nltk
+from ngram.NGram import NGramNLPModel
+
+
+
 
 # The first time you run this code, you may see there is not any annotated data
 # for tasks like pos tagging, so you need to download it first by uncommenting the following
@@ -85,5 +89,18 @@ for i in range(len(pos_tags_for_input_string)):
     
 # Print tokens including their Part Of Speech (POS) tag
 print(
-    pos_tags_for_input_string
+    type (pos_tags_for_input_string)
 )
+
+ngram_model = NGramNLPModel(10)
+
+with open('ngram/Frankenstein.txt', 'r', encoding='utf-8') as f:
+    text = f.read()
+    text = text.split('.')
+    for sentence in text:
+        # add back the fullstop
+        sentence += '.'
+        ngram_model.update(sentence)
+
+textGenerated=ngram_model.generate_text(60)
+print(textGenerated)
