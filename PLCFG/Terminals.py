@@ -110,7 +110,12 @@ class GrammarElement:
             terminal.calculate_probability( self.count )
         
         # Calculate the probability of this rule ending a sentence
-        self.ending_prob = self.ending_count / self.count
+        # self.ending_prob = self.ending_count / self.count
+
+    def add_sequence(self, _sequence_object):
+        # IMPORTANT, sequence objet is a SequenceElement object
+        # Add a sequence to the array of sequences
+        self.sequences.append( _sequence_object )
 
     def __str__(self):
         # String representation of this rule

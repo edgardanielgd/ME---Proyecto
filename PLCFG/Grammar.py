@@ -28,21 +28,22 @@ class Grammar:
 
         for parsed_sentence in sentences_trees:
             # Save each rule visited, the last one will be the end of the sentence
-            self.last_rule = None 
+            # self.last_rule = None 
 
             # Parse the tree to Chomsky Normal Form before traversing it.
             # By doing this on all training sentences, we will have a PCFG in CNF as well
             ParseChomskyNormalForm( parsed_sentence )
+            # parsed_sentence.chomsky_normal_form()
 
-            # First, we must define a START symbol which will be the root of the tree
+            # # First, we must define a START symbol which will be the root of the tree
             start_symbol = self.traverse(parsed_sentence)
 
-            # Add a rule to the start symbol, so we can check which
-            # terminal / non_terminal tends to start a sentence
-            self.non_terminals["START"].add_rule( [start_symbol] )
+            # # Add a rule to the start symbol, so we can check which
+            # # terminal / non_terminal tends to start a sentence
+            # self.non_terminals["START"].add_rule( [start_symbol] )
 
             # Increment by 1 the number of times last rule ends a sentence
-            self.last_rule.ending_count += 1
+            # self.last_rule.ending_count += 1
         
         # Calculate probabilities for each rule in the grammar
         for non_terminal, _ in self.non_terminals.items():
@@ -113,7 +114,7 @@ class Grammar:
 
         # Get the starting terminal
         if non_terminal is None:
-            starting_non_terminal = self.non_terminals["START"]
+            starting_non_terminal = self.non_terminals["S"]
         else:
             starting_non_terminal = self.non_terminals[non_terminal]
         

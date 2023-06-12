@@ -1,5 +1,7 @@
 from nltk.corpus import treebank
 from Grammar import Grammar
+from CYKTest import ParseCYK
+import numpy as np
 
 # Dictionary for saving all of seen rules (Both leafs and nodes)
 grammar = Grammar()
@@ -23,7 +25,11 @@ for _, non_terminal in grammar.non_terminals.items():
         if len(sequence.grammar_elements) > maximum:
             maximum = len(sequence.grammar_elements)
 
-print( maximum )
 
-# Generate a sentence using the grammar
-print( grammar.generate_sentence() )
+T = ParseCYK(
+    ["mothers", "and", "daughters", "are", "talking", "to", "each", "other"],
+    grammar
+)
+
+for tree in T.values():
+    print( tree )
