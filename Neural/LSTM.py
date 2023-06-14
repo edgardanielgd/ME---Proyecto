@@ -1,4 +1,5 @@
 import numpy as np
+from Utils import softmax, get_index_from_hot_encoding
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
