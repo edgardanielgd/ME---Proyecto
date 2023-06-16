@@ -47,7 +47,7 @@ class Ui_MainWindow(object):
         self.lblWindowTitle.setAlignment(Qt.AlignCenter)
         self.btnErase = QPushButton(self.centralwidget)
         self.btnErase.setObjectName(u"btnErase")
-        self.btnErase.setGeometry(QRect(130, 80, 91, 21))
+        self.btnErase.setGeometry(QRect(80, 70, 111, 31))
         font1 = QFont()
         font1.setPointSize(12)
         self.btnErase.setFont(font1)

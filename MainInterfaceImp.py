@@ -19,6 +19,10 @@ class MainInterface(QMainWindow, Ui_MainWindow):
         # Link reset text button
         self.btnErase.clicked.connect( self.resetText )
 
+        # We will help user adding the word he needs to complete the sentence
+        # when he clicks a certain item in the list
+        self.lstPredictions.itemClicked.connect( self.completeSentence )
+
         self.embeddingModel = embeddingModel
         self.ngramModel = ngramModel
 
@@ -104,3 +108,11 @@ class MainInterface(QMainWindow, Ui_MainWindow):
         
         for prediction in predictions:
             self.lstPredictions.addItem( prediction )
+
+    def completeSentence(self, item):
+        word = item.text()
+
+        # Get the current text
+        text = self.txtText.toPlainText()
+
+        self.txtText.setText( text + word + " " )

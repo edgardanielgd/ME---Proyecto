@@ -211,7 +211,7 @@ def create_embedding_model( load = False, embedding_size = 10, distance = 2 ):
 
     # files = treebank.fileids()[0:3]
     files = treebank.fileids()[:100]
-    print("Files: ", len(treebank.fileids()))
+    
     # Get dictionaries for hot encodings
     words = treebank.words( fileids = files )
     word_to_index, index_to_word, vocabulary_size = build_hot_encodings( words )

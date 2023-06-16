@@ -253,7 +253,7 @@ border-style: solid;</string>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
-  <include location="Interface/Resources/Images.qrc"/>
+  <include location="Resources/Images.qrc"/>
  </resources>
  <connections/>
 </ui>
