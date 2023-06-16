@@ -4,8 +4,8 @@ from Embedding import Embedding
 from LSTM import lstm_cell_forward, lstm_forward, lstm_cell_backward, lstm_backward
 
 # Slice to just some file ids (since words can exceed memory)
-# files = treebank.fileids()[0:3]
 files = treebank.fileids()[:20]
+
 # Get dictionaries for hot encodings
 words = treebank.words( fileids = files )
 word_to_index, index_to_word, vocabulary_size = build_hot_encodings( words )
@@ -19,7 +19,7 @@ distance = 2
 load = True
 
 # Create the embedding
-embedding = Embedding( embedding_size, distance )
+embedding = Embedding( word_to_index, index_to_word, embedding_size, distance )
 
 if load:
     print("Loading weights...")
@@ -37,18 +37,20 @@ lstm_size = 10
 # TEST: Train a single sentence
 
 # Initialize parameters
-# parameters = {
-#     "Wf": np.random.randn( lstm_size, lstm_size + embedding_size ) * 0.01,
-#     "bf": np.zeros( ( lstm_size, 1 ) ),
-#     "Wi": np.random.randn( lstm_size, lstm_size + embedding_size ) * 0.01,
-#     "bi": np.zeros( ( lstm_size, 1 ) ),
-#     "Wc": np.random.randn( lstm_size, lstm_size + embedding_size ) * 0.01,
-#     "bc": np.zeros( ( lstm_size, 1 ) ),
-#     "Wo": np.random.randn( lstm_size, lstm_size + embedding_size ) * 0.01,
-#     "bo": np.zeros( ( lstm_size, 1 ) ),
-#     "Wy": np.random.randn( vocabulary_size, lstm_size ) * 0.01,
-#     "by": np.zeros( ( vocabulary_size, 1 ) )
-# }
+parameters = {
+    "Wf": np.random.randn( lstm_size, lstm_size + embedding_size ) * 0.01,
+    "bf": np.zeros( ( lstm_size, 1 ) ),
+    "Wi": np.random.randn( lstm_size, lstm_size + embedding_size ) * 0.01,
+    "bi": np.zeros( ( lstm_size, 1 ) ),
+    "Wc": np.random.randn( lstm_size, lstm_size + embedding_size ) * 0.01,
+    "bc": np.zeros( ( lstm_size, 1 ) ),
+    "Wo": np.random.randn( lstm_size, lstm_size + embedding_size ) * 0.01,
+    "bo": np.zeros( ( lstm_size, 1 ) ),
+    "Wy": np.random.randn( vocabulary_size, lstm_size ) * 0.01,
+    "by": np.zeros( ( vocabulary_size, 1 ) )
+}
+
+# Train a single sentence
 
 # a_next, c_next, yt_pred, cache = lstm_forward(
 #     np.array( [ word_to_index[ "the" ] ] ), 
@@ -56,6 +58,7 @@ lstm_size = 10
 #     np.zeros( ( lstm_size, 1 ) ),
 #     parameters
 # )
+
 
 prediction = embedding.predict( "the", word_to_index, index_to_word )
 print( get_top_predictions( prediction, index_to_word, 10 ) )
