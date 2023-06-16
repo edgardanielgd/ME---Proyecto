@@ -69,10 +69,13 @@ border-width: 2px;</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background: none;
-background-color: purple;
-hover: {
-	background-color: yellow;
+     <string notr="true">QPushButton {
+	background: none;
+	background-color: purple;
+}
+
+QPushButton:hover {
+	background-color: blue;
 }</string>
     </property>
     <property name="text">

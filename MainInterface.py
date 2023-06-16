@@ -51,10 +51,13 @@ class Ui_MainWindow(object):
         font1 = QFont()
         font1.setPointSize(12)
         self.btnErase.setFont(font1)
-        self.btnErase.setStyleSheet(u"background: none;\n"
-"background-color: purple;\n"
-"hover: {\n"
-"	background-color: yellow;\n"
+        self.btnErase.setStyleSheet(u"QPushButton {\n"
+"	background: none;\n"
+"	background-color: purple;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"	background-color: blue;\n"
 "}")
         self.txtText = QTextEdit(self.centralwidget)
         self.txtText.setObjectName(u"txtText")
