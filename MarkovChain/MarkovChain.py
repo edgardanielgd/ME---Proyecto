@@ -100,7 +100,7 @@ class MarkovChain():
 
         probabilities = [weight / sum_weights for weight in weights]
 
-        return np.random.choice(words, p=probabilities, size=top_n, replace=False)
+        return np.random.choice(words, p=probabilities, size=min( top_n, len(words)), replace=False)
 
     # Save in JSON format
     def save(self, file_name):

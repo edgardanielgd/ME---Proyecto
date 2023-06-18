@@ -1,8 +1,7 @@
 from MainInterfaceImp import MainInterface
 from Neural.NeuralPrediction import create_neural_model
-from nltk.corpus import treebank
-from Neural.Utils import *
-from ngram.NGram import create_ngram_model
+from NGram.NGram import create_ngram_model
+from MarkovChain.MarkovChainModel import create_markov_chain_model
 import sys
 from PySide6.QtWidgets import QApplication
 
@@ -25,7 +24,15 @@ def run():
     ###### END NGRAM MODEL #######
     ##############################
 
-    interface = MainInterface( embedding, predictor, ngram, 5 )
+    ###### MARKOV CHAIN MODEL #######
+    ##############################
+
+    markov = create_markov_chain_model( True, 2 )
+
+    ###### END NGRAM MODEL #######
+    ##############################
+
+    interface = MainInterface( embedding, predictor, ngram, markov, 5 )
     sys.exit(app.exec())
 
 if __name__ == "__main__":

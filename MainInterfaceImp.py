@@ -4,7 +4,7 @@ import nltk
 from Neural.Utils import *
 
 class MainInterface(QMainWindow, Ui_MainWindow):
-    def __init__(self, embeddingModel, predictorModel, ngramModel, predictedCount = 10 ):
+    def __init__(self, embeddingModel, predictorModel, ngramModel, markovModel, predictedCount = 10 ):
         super(MainInterface, self).__init__()
         self.setupUi(self)
 
@@ -13,6 +13,7 @@ class MainInterface(QMainWindow, Ui_MainWindow):
         self.cmbModel.addItem("PCFG")
         self.cmbModel.addItem("Word Embedding")
         self.cmbModel.addItem("Neural Predictor")
+        self.cmbModel.addItem("Markov Chain")
 
         # Handle combo box change
         self.cmbModel.currentIndexChanged.connect( self.predict )
@@ -27,7 +28,7 @@ class MainInterface(QMainWindow, Ui_MainWindow):
         self.embeddingModel = embeddingModel
         self.predictorModel = predictorModel
         self.ngramModel = ngramModel
-        
+        self.markovModel = markovModel
         
         self.predictedCount = predictedCount
 
@@ -99,6 +100,14 @@ class MainInterface(QMainWindow, Ui_MainWindow):
         elif model == "NGram":
 
             predictions = self.ngramModel.generate_next_word( text, self.predictedCount )
+
+            if predictions is None:
+                return
+            
+            self.updatePredictionsList( predictions )
+
+        elif model == "Markov Chain":
+            predictions = self.markovModel.next_word( text, self.predictedCount )
 
             if predictions is None:
                 return
