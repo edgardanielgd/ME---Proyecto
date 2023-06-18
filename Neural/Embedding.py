@@ -1,6 +1,6 @@
 import numpy as np
 import nltk.corpus as corpus
-from .Utils import *
+from Utils import *
 from nltk.corpus import treebank
 
 # Condense a word (represented as an array of 0s and a single 1) to 

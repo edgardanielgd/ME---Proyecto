@@ -70,3 +70,39 @@ def get_top_predictions( softmax_result, index_to_word, ntop = 5 ):
 
     # And return the words
     return [ index_to_word[ i ] for i in top_predictions ]
+
+def clear_sentences( sentences ):
+    # Remove punctuation and convert to lower case
+    # Sentences is a matrix of words
+    # Each row is a sentence
+    # Each column is a word
+    def check( word ):
+        if word in ["!", ".", ",", "?", ":", ";", "\"", "\'"]:
+            return False
+        
+        return True
+
+
+    new_sentences = list(map(
+        lambda sentence: list(filter(
+            lambda word: check( word ),
+            sentence
+        )),
+        sentences
+    ))
+
+    # Convert to lower case
+    new_sentences = list(map(
+        lambda sentence: list(map(       
+            lambda word: word.lower(),
+            sentence
+        )),
+        new_sentences
+    ))
+
+    # Get array of all words in sentences
+    words = set([])
+    for sentence in new_sentences:
+        words = words.union( set( sentence ) )
+
+    return new_sentences, words

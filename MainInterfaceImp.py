@@ -4,7 +4,7 @@ import nltk
 from Neural.Utils import *
 
 class MainInterface(QMainWindow, Ui_MainWindow):
-    def __init__(self, embeddingModel, ngramModel, predictedCount = 10 ):
+    def __init__(self, embeddingModel, predictorModel, ngramModel, predictedCount = 10 ):
         super(MainInterface, self).__init__()
         self.setupUi(self)
 
@@ -12,6 +12,7 @@ class MainInterface(QMainWindow, Ui_MainWindow):
         self.cmbModel.addItem("NGram")
         self.cmbModel.addItem("PCFG")
         self.cmbModel.addItem("Word Embedding")
+        self.cmbModel.addItem("Neural Predictor")
 
         # Handle combo box change
         self.cmbModel.currentIndexChanged.connect( self.predict )
@@ -24,9 +25,9 @@ class MainInterface(QMainWindow, Ui_MainWindow):
         self.lstPredictions.itemClicked.connect( self.completeSentence )
 
         self.embeddingModel = embeddingModel
+        self.predictorModel = predictorModel
         self.ngramModel = ngramModel
-
-        print( "Predicted count: ", predictedCount )
+        
         
         self.predictedCount = predictedCount
 
@@ -79,7 +80,7 @@ class MainInterface(QMainWindow, Ui_MainWindow):
             # We are retraining our model with typed sentence
             # in order "to adapt" to the user's writing style
             # and make previous words more frequent
-            self.embeddingModel.special_train( words )
+            # self.embeddingModel.special_train( words )
             
             lastWord = words[-1]
             
@@ -87,6 +88,14 @@ class MainInterface(QMainWindow, Ui_MainWindow):
             predictions = get_top_predictions( rawPrediction, self.embeddingModel.index_to_word, self.predictedCount )
             self.updatePredictionsList( predictions )
         
+        elif model == "Neural Predictor":
+            
+            rawPrediction = self.predictorModel.predict( words )
+            predictions = get_top_predictions( 
+                rawPrediction, self.embeddingModel.index_to_word, self.predictedCount 
+            )
+            self.updatePredictionsList( predictions )
+
         elif model == "NGram":
 
             predictions = self.ngramModel.generate_next_word( text, self.predictedCount )
