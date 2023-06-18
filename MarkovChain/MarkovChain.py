@@ -75,7 +75,7 @@ class MarkovChain():
 
             self.chain[state][next_state] += 1
 
-    def next_word(self, text):
+    def next_word(self, text, top_n=1):
         # Get the last n (n = order) words
         sentence = re.split(r'\s*[\.\?!;:\-\—\/][\'"\)\]]*\s*', text)
         # Clean the sentence
@@ -100,7 +100,7 @@ class MarkovChain():
 
         probabilities = [weight / sum_weights for weight in weights]
 
-        return np.random.choice(words, p=probabilities)
+        return np.random.choice(words, p=probabilities, size=top_n, replace=False)
 
     # Save in JSON format
     def save(self, file_name):

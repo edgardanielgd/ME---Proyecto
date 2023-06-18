@@ -27,4 +27,4 @@ except FileNotFoundError:
     mChain.save("markov_chain")
 
 # Predict the next word
-print(mChain.next_word("I was walking down the"))
+print(mChain.next_word("I was walking down the", 5))
