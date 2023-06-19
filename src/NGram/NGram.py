@@ -77,12 +77,12 @@ class NGramNLPModel:
             max_similarity = -1
             most_similar_context = None
             for context in self.ngram_probabilities:
-                if context[:-1] == prefix[1:]:
-                    # Using jaccard distance metric, note that we can consider using cosine distance as well
-                    similarity = nltk.jaccard_distance(set(prefix), set(context))
-                    if similarity > max_similarity:
-                        max_similarity = similarity
-                        most_similar_context = context
+                # if context[:-1] == prefix[1:]:
+                # Using jaccard distance metric, note that we can consider using cosine distance as well
+                similarity = nltk.jaccard_distance(set(prefix), set(context))
+                if similarity > max_similarity:
+                    max_similarity = similarity
+                    most_similar_context = context
             
             # If we found a similar context, we use it
             if most_similar_context is not None:

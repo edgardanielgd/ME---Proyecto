@@ -9,19 +9,6 @@ class Grammar:
     def __init__(self):
         self.non_terminals = {}
         self.terminals = {}
-
-        # A start is a non terminal and will match the rule
-        # starting a sentence
-        self.non_terminals["START"] = GrammarElement(
-            "START"
-        )
-
-        # In other side, END implies the end of a sentence
-        # then non terminals targeting this terminal will
-        # be the last rule in a generated sentence
-        self.terminals["END"] = GrammarElement(
-            "END", True
-        )
     
     def learn_grammar_from_trees( self, sentences_trees ):
         # Print the first parsed sentence
@@ -36,14 +23,7 @@ class Grammar:
             # parsed_sentence.chomsky_normal_form()
 
             # # First, we must define a START symbol which will be the root of the tree
-            start_symbol = self.traverse(parsed_sentence)
-
-            # # Add a rule to the start symbol, so we can check which
-            # # terminal / non_terminal tends to start a sentence
-            # self.non_terminals["START"].add_rule( [start_symbol] )
-
-            # Increment by 1 the number of times last rule ends a sentence
-            # self.last_rule.ending_count += 1
+            self.traverse(parsed_sentence)
         
         # Calculate probabilities for each rule in the grammar
         for non_terminal, _ in self.non_terminals.items():
@@ -150,3 +130,9 @@ class Grammar:
     # Its required to a parse tree to be in Chomsky Normal Form
     # so the best solution is to take each sentence and convert it
     # Then our PCFG will be in CNF        
+
+    def save_grammar( self, path):
+        pass
+
+    def load_grammar( self, path ):
+        pass

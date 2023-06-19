@@ -30,15 +30,13 @@ class Dense(Layer):
         if self.upper_layer is not None:
             self.upper_layer.forward( self.output_data )
         
-        
-        
         return self.output_data
     
     def backward( self, error, learning_rate = 0.01 ):
         # Error must have a length of output_dim
         self.w_gradients = np.dot( self.input_data[:, np.newaxis], error[np.newaxis, :] )
 
-        # Calculate the error for the next layer
+        # Calculate the error for the previous layer
         self.error = np.dot( error, self.weights.T )
 
         # Update the weights and biases
