@@ -4,7 +4,7 @@ import nltk
 from Neural.Utils import *
 
 class MainInterface(QMainWindow, Ui_MainWindow):
-    def __init__(self, embeddingModel, predictorModel, ngramModel, markovModel, predictedCount = 10 ):
+    def __init__(self, embeddingModel, predictorModel, ngramModel, markovModel, pcfgModel, predictedCount = 10 ):
         super(MainInterface, self).__init__()
         self.setupUi(self)
 
@@ -29,6 +29,7 @@ class MainInterface(QMainWindow, Ui_MainWindow):
         self.predictorModel = predictorModel
         self.ngramModel = ngramModel
         self.markovModel = markovModel
+        self.pcfgModel = pcfgModel
         
         self.predictedCount = predictedCount
 
@@ -113,6 +114,15 @@ class MainInterface(QMainWindow, Ui_MainWindow):
                 return
             
             self.updatePredictionsList( predictions )
+        
+        elif model == "PCFG":
+            predictions = self.pcfgModel.predict_next_word( text, self.predictedCount )
+
+            if predictions is None:
+                return
+            
+            self.updatePredictionsList( predictions )
+            pass
 
     def resetText(self):
         self.txtText.clear()

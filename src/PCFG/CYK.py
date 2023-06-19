@@ -1,5 +1,5 @@
 import numpy as np
-from Terminals import GrammarElement, SequenceElement
+from .Terminals import GrammarElement, SequenceElement
 
 def subspans( sentence_length ):
      for length in range(2, sentence_length + 1):
@@ -124,13 +124,65 @@ def get_path( CYKTree ):
     
     return path
     
-def predict_from_path( path, k ):
+def predict_from_path( grammar, path, k ):
     # Path is a path from Non Terminals
     predicted = []
     for i in range( len( path ) - 1, -1, -1 ):
-        non_terminal = path[i]
+        gotten_non_terminal = path[i]
+        
+        # Actual non_terminal from original grammar
+        non_terminal = grammar.non_terminals[ gotten_non_terminal.name ]
 
         if non_terminal is None:
             continue
             
-        # Get terminals associated with this non terminal
+        # Now we can take a different path which is another possible sequence of non terminals
+        u = np.random.uniform( 0, 1 )
+
+        # We should normalize probabilities from non terminals removing terminals probs
+        # and then normalize them
+        non_terminal_probabilities = []
+        for sequence in non_terminal.sequences:
+            non_terminal_probabilities.append( sequence.probability )
+        
+        # Normalize probabilities
+        non_terminal_probabilities = np.array( non_terminal_probabilities )
+        non_terminal_probabilities /= np.sum( non_terminal_probabilities )
+
+        # Now probabilities are normalized, so we can choose a random sequence
+        # based on the probabilities
+        non_terminal_distribution = np.cumsum( non_terminal_probabilities )
+
+        for i in range( len( non_terminal_distribution ) ):
+            if u <= non_terminal_distribution[i]:
+                # This is the sequence to choose
+                elements = non_terminal.sequences[i].grammar_elements
+
+                # Choose the last element of the sequence
+                element = elements[-1]
+
+                # Choose a random terminal from this element
+                u = np.random.uniform( 0, 1 )
+
+                # We should normalize probabilities from terminals
+                terminal_probabilities = []
+                for terminal in element.terminals:
+                    terminal_probabilities.append( terminal.probability )
+
+                # Normalize probabilities
+                terminal_probabilities = np.array( terminal_probabilities )
+                terminal_probabilities /= np.sum( terminal_probabilities )
+
+                # Now probabilities are normalized, so we can choose a random sequence
+                # based on the probabilities
+                terminal_distribution = np.cumsum( terminal_probabilities )
+
+                for i in range( len( terminal_distribution ) ):
+                    if u <= terminal_distribution[i]:
+                        # This is the terminal to choose
+                        if len( predicted ) < k:
+                            predicted.append( element.terminal_value )
+            
+    return predicted
+                    
+                

@@ -1,6 +1,7 @@
 import random
-from Terminals import GrammarElement
-from ChomskyNormalForm import ParseChomskyNormalForm
+from .Terminals import GrammarElement
+from .ChomskyNormalForm import ParseChomskyNormalForm
+from .CYK import ParseCYK, get_path, predict_from_path
 import nltk
 
 # Save terminals and non_terminals to a specific class 
@@ -129,7 +130,29 @@ class Grammar:
 
     # Its required to a parse tree to be in Chomsky Normal Form
     # so the best solution is to take each sentence and convert it
-    # Then our PCFG will be in CNF        
+    # Then our PCFG will be in CNF
+
+    def predict_next_word( self, sentence, predicted_count = 5 ):
+        # First lets get the most probable structure of sentence
+        # using CYK algorithm
+        words = nltk.word_tokenize( sentence )
+
+        # Get the most probable structure of the sentence
+        T = ParseCYK( words, self )
+
+        # Get the root parent node
+        rooted = ( "S", 1, len( words ) )
+
+        if rooted not in T:
+            # Return random word from trained sentences
+            words = self.terminals.keys()
+            return random.sample( words, predicted_count )
+        
+        root = T[ rooted ]
+        path = get_path( root )
+        words = predict_from_path( self, path, predicted_count )
+
+        return words
 
     def save_grammar( self, path):
         pass
