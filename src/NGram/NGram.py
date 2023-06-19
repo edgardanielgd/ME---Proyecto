@@ -1,7 +1,6 @@
 import nltk
 import random
 import numpy as np
-import matplotlib.pyplot as plt
 from nltk.util import ngrams
 from nltk.book import *
 import pickle
