@@ -153,10 +153,10 @@ def predict_from_path( grammar, path, k ):
         # based on the probabilities
         non_terminal_distribution = np.cumsum( non_terminal_probabilities )
 
-        for i in range( len( non_terminal_distribution ) ):
-            if u <= non_terminal_distribution[i]:
+        for j in range( len( non_terminal_distribution ) ):
+            if u <= non_terminal_distribution[j]:
                 # This is the sequence to choose
-                elements = non_terminal.sequences[i].grammar_elements
+                elements = non_terminal.sequences[j].grammar_elements
 
                 # Choose the last element of the sequence
                 element = elements[-1]
@@ -177,8 +177,8 @@ def predict_from_path( grammar, path, k ):
                 # based on the probabilities
                 terminal_distribution = np.cumsum( terminal_probabilities )
 
-                for i in range( len( terminal_distribution ) ):
-                    if u <= terminal_distribution[i]:
+                for q in range( len( terminal_distribution ) ):
+                    if u <= terminal_distribution[q]:
                         # This is the terminal to choose
                         if len( predicted ) < k:
                             predicted.append( element.terminal_value )
