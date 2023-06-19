@@ -1,3 +1,4 @@
+import random
 import numpy as np
 from .Terminals import GrammarElement, SequenceElement
 
@@ -18,6 +19,18 @@ def ParseCYK( sentence, grammar ):
         T = {}
 
         # Iterate over each terminal rule and initialize it with its probability
+
+
+        #####
+        # We will modify CYK a little bit for saving references to right brothers of each rule
+
+        # Dict of dicts in the following way:
+        # brothers[ rulename ] = {
+        #   brother : count, # Count of times this brother appears
+        #   brother2 : count2
+        #   ...
+        # }
+        brothers = {} 
 
         
         # Terminals are related to a parent non terminal
@@ -65,6 +78,16 @@ def ParseCYK( sentence, grammar ):
                         Z = sequence.grammar_elements[1]
                         p = sequence.probability
 
+                        # Z is the rightmost parent of Y, so save this
+                        if not Y.name in brothers:
+                            brothers[ Y.name ] = {}
+                        
+                        if not Z.name in brothers[ Y.name ]:
+                            brothers[ Y.name ][ Z.name ] = 1
+                        else:
+                            brothers[ Y.name ][ Z.name ] += 1
+
+
                         # We will calculate the value of PYZ, but we should first
                         # Check if P[Y, i, j] and P[Z, j + 1, k] exist (if not, then the probability is 0)
                         if ( Y.name, i, j ) in P and ( Z.name, j + 1, k ) in P:
@@ -98,7 +121,7 @@ def ParseCYK( sentence, grammar ):
                             # Finally add the non terminal to the tree
                             T[(name, i, k)] = root_non_terminal
         
-        return T
+        return T, brothers
                     
 def get_path( CYKTree ):
     # Get the parent of the last word and return it
@@ -122,67 +145,95 @@ def get_path( CYKTree ):
 
         path.append( non_terminal )
     
+    
     return path
     
-def predict_from_path( grammar, path, k ):
+def predict_from_path( grammar, path, brothers, k ):
     # Path is a path from Non Terminals
     predicted = []
-    for i in range( len( path ) - 1, -1, -1 ):
-        gotten_non_terminal = path[i]
-        
-        # Actual non_terminal from original grammar
-        non_terminal = grammar.non_terminals[ gotten_non_terminal.name ]
 
-        if non_terminal is None:
-            continue
-            
-        # Now we can take a different path which is another possible sequence of non terminals
+    # Get last terminal which generates the last word
+    if len( path ) < 2:
+
+        # Throw random words since path does not have enough elements
+        values = list( grammar.terminals().keys() )
+        probabilities = list( map(
+            lambda x: x.probability,
+            grammar.terminals().values()
+        ))
+        return np.random.choice(
+            values, size = min( k, len( values ) ), p = probabilities, replace = False
+        )
+    
+    # Calculate probabilities for brothers of last non terminal
+    last_terminal = path[-2]
+
+    brothers_values = list(brothers[ last_terminal.name ].keys())
+    brother_probabilities = list(brothers[ last_terminal.name ].values())
+
+    # Iterate until we have k predictions or we have no more brothers
+    while len( brother_probabilities ) > 0:
+
+        # Choose a random brother having weights
         u = np.random.uniform( 0, 1 )
 
-        # We should normalize probabilities from non terminals removing terminals probs
-        # and then normalize them
-        non_terminal_probabilities = []
-        for sequence in non_terminal.sequences:
-            non_terminal_probabilities.append( sequence.probability )
-        
-        # Normalize probabilities
-        non_terminal_probabilities = np.array( non_terminal_probabilities )
-        non_terminal_probabilities /= np.sum( non_terminal_probabilities )
+        # We should normalize probabilities from brothers
+        brothers_total = sum( brother_probabilities )
 
+        for brother_id in range(len(brother_probabilities)):
+            brother_probabilities[ brother_id ] = brother_probabilities[ brother_id ] / brothers_total
+        
         # Now probabilities are normalized, so we can choose a random sequence
         # based on the probabilities
-        non_terminal_distribution = np.cumsum( non_terminal_probabilities )
+        brother_distribution = np.cumsum( brother_probabilities )
 
-        for j in range( len( non_terminal_distribution ) ):
-            if u <= non_terminal_distribution[j]:
-                # This is the sequence to choose
-                elements = non_terminal.sequences[j].grammar_elements
+        for j in range( len( brother_distribution ) ):
+            chosen_brother_probability = brother_probabilities[j]
 
-                # Choose the last element of the sequence
-                element = elements[-1]
+            if u <= chosen_brother_probability:
+                # Drop this brother from the list
+                brother_probabilities.pop( j )
+                chosen_brother = brothers_values.pop( j )
+                chosen_brother = grammar.non_terminals[ chosen_brother ]
 
                 # Choose a random terminal from this element
-                u = np.random.uniform( 0, 1 )
 
-                # We should normalize probabilities from terminals
-                terminal_probabilities = []
-                for terminal in element.terminals:
-                    terminal_probabilities.append( terminal.probability )
+                terminals_values = chosen_brother.terminals
+                terminal_probabilities = list( map(
+                    lambda x: x.probability,
+                    terminals_values
+                ))
 
-                # Normalize probabilities
-                terminal_probabilities = np.array( terminal_probabilities )
-                terminal_probabilities /= np.sum( terminal_probabilities )
+                while( len( terminal_probabilities ) > 0 ):
+                    u = np.random.uniform( 0, 1 )
 
-                # Now probabilities are normalized, so we can choose a random sequence
-                # based on the probabilities
-                terminal_distribution = np.cumsum( terminal_probabilities )
+                    # We should normalize probabilities from terminals
+                    terminal_probabilities_sum = sum( terminal_probabilities )
 
-                for q in range( len( terminal_distribution ) ):
-                    if u <= terminal_distribution[q]:
-                        # This is the terminal to choose
-                        if len( predicted ) < k:
-                            predicted.append( element.terminal_value )
-            
-    return predicted
-                    
+                    for terminal_id in range(len(terminal_probabilities)):
+                        terminal_probabilities[ terminal_id ] = terminal_probabilities[ terminal_id ] / terminal_probabilities_sum
+
+                    # Now probabilities are normalized, so we can choose a random sequence
+                    # based on the probabilities
+
+                    terminal_distribution = np.cumsum( terminal_probabilities )
+
+                    for q in range( len( terminal_distribution ) ):
+                        if u <= terminal_distribution[q]:
+                            # This is the terminal to choose
+
+                            # Drop this terminal from the list
+                            terminal_probabilities.pop( q )
+                            terminal_value = terminals_values.pop( q )
+
+                            terminal = terminal_value.grammar_elements[0]
+
+                            predicted.append( terminal.terminal_value )
+
+                            if len( predicted ) >= k:
+                                return predicted
+
+                            break
+                break
                 
+    return predicted

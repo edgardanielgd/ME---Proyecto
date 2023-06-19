@@ -138,10 +138,10 @@ class Grammar:
         words = nltk.word_tokenize( sentence )
 
         # Get the most probable structure of the sentence
-        T = ParseCYK( words, self )
+        T, brothers = ParseCYK( words, self )
 
         # Get the root parent node
-        rooted = ( "S", 1, len( words ) )
+        rooted = ( "S", 1, len( words ) - 1 )
 
         if rooted not in T:
             # Return random word from trained sentences
@@ -150,7 +150,7 @@ class Grammar:
         
         root = T[ rooted ]
         path = get_path( root )
-        words = predict_from_path( self, path, predicted_count )
+        words = predict_from_path( self, path, brothers, predicted_count  )
 
         return words
 
